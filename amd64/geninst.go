@@ -40,6 +40,48 @@ func (a *Assembler) Notb(o Operand) {
 	o.ModRM(a, Register{2, 0})
 }
 
+func (a *Assembler) ShlCl(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xd3)
+	o.ModRM(a, Register{4, 0})
+}
+
+func (a *Assembler) ShrCl(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xd3)
+	o.ModRM(a, Register{5, 0})
+}
+
+func (a *Assembler) SarCl(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xd3)
+	o.ModRM(a, Register{7, 0})
+}
+
+func (a *Assembler) RolCl(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xd3)
+	o.ModRM(a, Register{0, 0})
+}
+
+func (a *Assembler) RorCl(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xd3)
+	o.ModRM(a, Register{1, 0})
+}
+
+func (a *Assembler) RclCl(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xd3)
+	o.ModRM(a, Register{2, 0})
+}
+
+func (a *Assembler) RcrCl(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xd3)
+	o.ModRM(a, Register{3, 0})
+}
+
 func (asm *Assembler) arithmeticImmReg(insn *Instruction, src Imm, dst Register) {
 	if insn.imm_r != nil {
 		asm.rex(false, false, false, dst.Val > 7)
@@ -140,6 +182,14 @@ func (a *Assembler) Testb(src, dst Operand) { a.Arithmetic(InstTestb, src, dst) 
 func (a *Assembler) Xor(src, dst Operand)   { a.Arithmetic(InstXor, src, dst) }
 func (a *Assembler) Xorb(src, dst Operand)  { a.Arithmetic(InstXorb, src, dst) }
 
+func (a *Assembler) Rol(src, dst Operand)  { a.Arithmetic(InstRol, src, dst) }
+func (a *Assembler) Rolb(src, dst Operand) { a.Arithmetic(InstRolb, src, dst) }
+func (a *Assembler) Ror(src, dst Operand)  { a.Arithmetic(InstRor, src, dst) }
+func (a *Assembler) Rorb(src, dst Operand) { a.Arithmetic(InstRorb, src, dst) }
+func (a *Assembler) Rcl(src, dst Operand)  { a.Arithmetic(InstRcl, src, dst) }
+func (a *Assembler) Rclb(src, dst Operand) { a.Arithmetic(InstRclb, src, dst) }
+func (a *Assembler) Rcr(src, dst Operand)  { a.Arithmetic(InstRcr, src, dst) }
+func (a *Assembler) Rcrb(src, dst Operand) { a.Arithmetic(InstRcrb, src, dst) }
 func (a *Assembler) Shl(src, dst Operand)  { a.Arithmetic(InstShl, src, dst) }
 func (a *Assembler) Shlb(src, dst Operand) { a.Arithmetic(InstShlb, src, dst) }
 func (a *Assembler) Shr(src, dst Operand)  { a.Arithmetic(InstShr, src, dst) }
@@ -152,8 +202,10 @@ func (a *Assembler) Btc(src, dst Operand) { a.Arithmetic(InstBtc, src, dst) }
 func (a *Assembler) Bts(src, dst Operand) { a.Arithmetic(InstBts, src, dst) }
 func (a *Assembler) Btr(src, dst Operand) { a.Arithmetic(InstBtr, src, dst) }
 
-func (a *Assembler) Int3() { a.byte(0xcc) }
-func (a *Assembler) Ret()  { a.byte(0xc3) }
+func (a *Assembler) Int3()  { a.byte(0xcc) }
+func (a *Assembler) Ret()   { a.byte(0xc3) }
+func (a *Assembler) Pushf() { a.byte(0x9c) }
+func (a *Assembler) Popf()  { a.byte(0x9d) }
 
 func (a *Assembler) Call(dst Operand) {
 	if _, ok := dst.(Imm); ok {

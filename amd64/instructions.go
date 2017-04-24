@@ -52,12 +52,19 @@ var (
 	InstXor  = &Instruction{"xor", nil, ImmRm{j{0x81}, 6, 0}, j{0x31}, j{0x33}, 64}
 	InstXorb = &Instruction{"xorb", nil, ImmRm{j{0x80}, 6, 0}, j{0x30}, j{0x32}, 8}
 
+	InstRol  = &Instruction{"rol", nil, ImmRm{j{0xC1}, 0, 8}, nil, nil, 64}
+	InstRolb = &Instruction{"rolb", nil, ImmRm{j{0xC0}, 0, 8}, nil, nil, 8}
+	InstRor  = &Instruction{"rol", nil, ImmRm{j{0xC1}, 1, 8}, nil, nil, 64}
+	InstRorb = &Instruction{"rolb", nil, ImmRm{j{0xC0}, 1, 8}, nil, nil, 8}
+	InstRcl  = &Instruction{"rcl", nil, ImmRm{j{0xC1}, 2, 8}, nil, nil, 64}
+	InstRclb = &Instruction{"rclb", nil, ImmRm{j{0xC0}, 2, 8}, nil, nil, 8}
+	InstRcr  = &Instruction{"rcl", nil, ImmRm{j{0xC1}, 3, 8}, nil, nil, 64}
+	InstRcrb = &Instruction{"rclb", nil, ImmRm{j{0xC0}, 3, 8}, nil, nil, 8}
+
 	InstShl  = &Instruction{"shl", nil, ImmRm{j{0xC1}, 4, 8}, nil, nil, 64}
 	InstShlb = &Instruction{"shlb", nil, ImmRm{j{0xC0}, 4, 8}, nil, nil, 8}
-
 	InstShr  = &Instruction{"shr", nil, ImmRm{j{0xC1}, 5, 8}, nil, nil, 64}
 	InstShrb = &Instruction{"shrb", nil, ImmRm{j{0xC0}, 5, 8}, nil, nil, 8}
-
 	InstSar  = &Instruction{"sar", nil, ImmRm{j{0xC1}, 7, 8}, nil, nil, 64}
 	InstSarb = &Instruction{"sarb", nil, ImmRm{j{0xC0}, 7, 8}, nil, nil, 8}
 
