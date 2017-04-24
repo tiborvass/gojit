@@ -46,6 +46,10 @@ const (
 	CC_LE = 0xE
 	CC_G  = 0xF
 
+	/* alternative mnemonics */
+	CC_C  = CC_B
+	CC_NC = CC_AE
+
 	PFX_REX = 0x40
 	REXW    = 0x08
 	REXR    = 0x04
