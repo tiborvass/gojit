@@ -28,25 +28,40 @@ func (a *Assembler) Decb(o Operand) {
 	o.ModRM(a, Register{1, 0})
 }
 
+func (a *Assembler) Not(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xf7)
+	o.ModRM(a, Register{2, 0})
+}
+
+func (a *Assembler) Notb(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xf6)
+	o.ModRM(a, Register{2, 0})
+}
+
 func (asm *Assembler) arithmeticImmReg(insn *Instruction, src Imm, dst Register) {
-	if insn.imm_r.ok() {
+	if insn.imm_r != nil {
 		asm.rex(false, false, false, dst.Val > 7)
-		asm.byte(insn.imm_r.value() | (dst.Val & 7))
+		if len(insn.imm_r) > 1 {
+			panic("unsupported")
+		}
+		asm.byte(insn.imm_r[0] | (dst.Val & 7))
 	} else {
 		asm.rex(dst.Bits == 64, false, dst.Val > 7, false)
-		asm.byte(insn.imm_rm.op.value())
+		asm.bytes(insn.imm_rm.op)
 		asm.modrm(MOD_REG, insn.imm_rm.sub, dst.Val&7)
 	}
 }
 
 func (asm *Assembler) arithmeticRegReg(insn *Instruction, src Register, dst Register) {
-	if insn.r_rm.ok() {
+	if insn.r_rm != nil {
 		dst.Rex(asm, src)
-		asm.byte(insn.r_rm.value())
+		asm.bytes(insn.r_rm)
 		dst.ModRM(asm, src)
 	} else {
 		src.Rex(asm, dst)
-		asm.byte(insn.rm_r.value())
+		asm.bytes(insn.rm_r)
 		src.ModRM(asm, dst)
 	}
 }
@@ -58,7 +73,7 @@ func (asm *Assembler) Arithmetic(insn *Instruction, src, dst Operand) {
 			asm.arithmeticImmReg(insn, s, dr)
 		} else {
 			dst.Rex(asm, Register{insn.imm_rm.sub, 0})
-			asm.byte(insn.imm_rm.op.value())
+			asm.bytes(insn.imm_rm.op)
 			dst.ModRM(asm, Register{insn.imm_rm.sub, 0})
 		}
 		if insn.bits == 8 {
@@ -72,7 +87,7 @@ func (asm *Assembler) Arithmetic(insn *Instruction, src, dst Operand) {
 			asm.arithmeticRegReg(insn, s, dr)
 		} else {
 			dst.Rex(asm, s)
-			asm.byte(insn.r_rm.value())
+			asm.bytes(insn.r_rm)
 			dst.ModRM(asm, s)
 		}
 		return
@@ -85,91 +100,65 @@ func (asm *Assembler) Arithmetic(insn *Instruction, src, dst Operand) {
 	}
 
 	src.Rex(asm, dr)
-	asm.byte(insn.rm_r.value())
+	asm.bytes(insn.rm_r)
 	src.ModRM(asm, dr)
-}
-
-func (a *Assembler) Add(src, dst Operand) {
-	a.Arithmetic(InstAdd, src, dst)
-}
-
-func (a *Assembler) Addb(src, dst Operand) {
-	a.Arithmetic(InstAddb, src, dst)
-}
-
-func (a *Assembler) And(src, dst Operand) {
-	a.Arithmetic(InstAnd, src, dst)
-}
-
-func (a *Assembler) Andb(src, dst Operand) {
-	a.Arithmetic(InstAndb, src, dst)
-}
-
-func (a *Assembler) Cmp(src, dst Operand) {
-	a.Arithmetic(InstCmp, src, dst)
-}
-
-func (a *Assembler) Cmpb(src, dst Operand) {
-	a.Arithmetic(InstCmpb, src, dst)
-}
-
-func (a *Assembler) Mov(src, dst Operand) {
-	a.Arithmetic(InstMov, src, dst)
-}
-
-func (a *Assembler) Movb(src, dst Operand) {
-	a.Arithmetic(InstMovb, src, dst)
 }
 
 func (a *Assembler) MovAbs(src uint64, dst Register) {
 	a.rex(true, false, false, dst.Val > 7)
-	a.byte(InstMov.imm_r.value() | (dst.Val & 7))
+	if len(InstMov.imm_r) > 1 {
+		panic("unsupported")
+	}
+	a.byte(InstMov.imm_r[0] | (dst.Val & 7))
 	a.int64(src)
 }
 
-func (a *Assembler) Or(src, dst Operand) {
-	a.Arithmetic(InstOr, src, dst)
-}
+func (a *Assembler) Add(src, dst Operand)   { a.Arithmetic(InstAdd, src, dst) }
+func (a *Assembler) Addl(src, dst Operand)  { a.Arithmetic(InstAddl, src, dst) }
+func (a *Assembler) Addb(src, dst Operand)  { a.Arithmetic(InstAddb, src, dst) }
+func (a *Assembler) Adc(src, dst Operand)   { a.Arithmetic(InstAdc, src, dst) }
+func (a *Assembler) Adcl(src, dst Operand)  { a.Arithmetic(InstAdcl, src, dst) }
+func (a *Assembler) Adcb(src, dst Operand)  { a.Arithmetic(InstAdcb, src, dst) }
+func (a *Assembler) And(src, dst Operand)   { a.Arithmetic(InstAnd, src, dst) }
+func (a *Assembler) Andl(src, dst Operand)  { a.Arithmetic(InstAndl, src, dst) }
+func (a *Assembler) Andb(src, dst Operand)  { a.Arithmetic(InstAndb, src, dst) }
+func (a *Assembler) Cmp(src, dst Operand)   { a.Arithmetic(InstCmp, src, dst) }
+func (a *Assembler) Cmpl(src, dst Operand)  { a.Arithmetic(InstCmpl, src, dst) }
+func (a *Assembler) Cmpb(src, dst Operand)  { a.Arithmetic(InstCmpb, src, dst) }
+func (a *Assembler) Mov(src, dst Operand)   { a.Arithmetic(InstMov, src, dst) }
+func (a *Assembler) Movl(src, dst Operand)  { a.Arithmetic(InstMovl, src, dst) }
+func (a *Assembler) Movb(src, dst Operand)  { a.Arithmetic(InstMovb, src, dst) }
+func (a *Assembler) Or(src, dst Operand)    { a.Arithmetic(InstOr, src, dst) }
+func (a *Assembler) Orl(src, dst Operand)   { a.Arithmetic(InstOrl, src, dst) }
+func (a *Assembler) Orb(src, dst Operand)   { a.Arithmetic(InstOrb, src, dst) }
+func (a *Assembler) Lea(src, dst Operand)   { a.Arithmetic(InstLea, src, dst) }
+func (a *Assembler) Sbb(src, dst Operand)   { a.Arithmetic(InstSbb, src, dst) }
+func (a *Assembler) Sbbl(src, dst Operand)  { a.Arithmetic(InstSbbl, src, dst) }
+func (a *Assembler) Sbbb(src, dst Operand)  { a.Arithmetic(InstSbbb, src, dst) }
+func (a *Assembler) Sub(src, dst Operand)   { a.Arithmetic(InstSub, src, dst) }
+func (a *Assembler) Subl(src, dst Operand)  { a.Arithmetic(InstSubl, src, dst) }
+func (a *Assembler) Subb(src, dst Operand)  { a.Arithmetic(InstSubb, src, dst) }
+func (a *Assembler) Test(src, dst Operand)  { a.Arithmetic(InstTest, src, dst) }
+func (a *Assembler) Testl(src, dst Operand) { a.Arithmetic(InstTestl, src, dst) }
+func (a *Assembler) Testb(src, dst Operand) { a.Arithmetic(InstTestb, src, dst) }
+func (a *Assembler) Xor(src, dst Operand)   { a.Arithmetic(InstXor, src, dst) }
+func (a *Assembler) Xorl(src, dst Operand)  { a.Arithmetic(InstXorl, src, dst) }
+func (a *Assembler) Xorb(src, dst Operand)  { a.Arithmetic(InstXorb, src, dst) }
 
-func (a *Assembler) Orb(src, dst Operand) {
-	a.Arithmetic(InstOrb, src, dst)
-}
+func (a *Assembler) Shl(src, dst Operand)  { a.Arithmetic(InstShl, src, dst) }
+func (a *Assembler) Shlb(src, dst Operand) { a.Arithmetic(InstShlb, src, dst) }
+func (a *Assembler) Shr(src, dst Operand)  { a.Arithmetic(InstShr, src, dst) }
+func (a *Assembler) Shrb(src, dst Operand) { a.Arithmetic(InstShrb, src, dst) }
+func (a *Assembler) Sar(src, dst Operand)  { a.Arithmetic(InstSar, src, dst) }
+func (a *Assembler) Sarb(src, dst Operand) { a.Arithmetic(InstSarb, src, dst) }
 
-func (a *Assembler) Lea(src, dst Operand) {
-	a.Arithmetic(InstLea, src, dst)
-}
+func (a *Assembler) Bt(src, dst Operand)  { a.Arithmetic(InstBt, src, dst) }
+func (a *Assembler) Btc(src, dst Operand) { a.Arithmetic(InstBtc, src, dst) }
+func (a *Assembler) Bts(src, dst Operand) { a.Arithmetic(InstBts, src, dst) }
+func (a *Assembler) Btr(src, dst Operand) { a.Arithmetic(InstBtr, src, dst) }
 
-func (a *Assembler) Sub(src, dst Operand) {
-	a.Arithmetic(InstSub, src, dst)
-}
-
-func (a *Assembler) Subb(src, dst Operand) {
-	a.Arithmetic(InstSubb, src, dst)
-}
-
-func (a *Assembler) Test(src, dst Operand) {
-	a.Arithmetic(InstTest, src, dst)
-}
-
-func (a *Assembler) Testb(src, dst Operand) {
-	a.Arithmetic(InstTestb, src, dst)
-}
-
-func (a *Assembler) Xor(src, dst Operand) {
-	a.Arithmetic(InstXor, src, dst)
-}
-
-func (a *Assembler) Xorb(src, dst Operand) {
-	a.Arithmetic(InstXorb, src, dst)
-}
-
-func (a *Assembler) Int3() {
-	a.byte(0xcc)
-}
-
-func (a *Assembler) Ret() {
-	a.byte(0xc3)
-}
+func (a *Assembler) Int3() { a.byte(0xcc) }
+func (a *Assembler) Ret()  { a.byte(0xc3) }
 
 func (a *Assembler) Call(dst Operand) {
 	if _, ok := dst.(Imm); ok {
@@ -217,6 +206,13 @@ func (a *Assembler) JmpRel(dst uintptr) {
 func (a *Assembler) JccShort(cc byte, off int8) {
 	a.byte(0x70 | cc)
 	a.byte(byte(off))
+}
+
+func (a *Assembler) Setcc(cc byte, dst Register) {
+	a.rex(false, false, false, dst.Val > 7)
+	a.byte(0x0f)
+	a.byte(0x90 | cc)
+	dst.ModRM(a, dst)
 }
 
 func (a *Assembler) JccRel(cc byte, dst uintptr) {

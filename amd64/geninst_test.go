@@ -136,13 +136,13 @@ func TestArith(t *testing.T) {
 	for _, tc := range cases {
 		asm := &Assembler{buf, 0, CgoABI}
 		var funcs []func(uintptr) uintptr
-		if tc.insn.imm_r.ok() {
+		if tc.insn.imm_r != nil {
 			begin(asm)
 			asm.Mov(Imm{tc.rhs}, Rax)
 			asm.Arithmetic(tc.insn, Imm{tc.lhs}, Rax)
 			funcs = append(funcs, finish(asm))
 		}
-		if tc.insn.imm_rm.op.ok() {
+		if tc.insn.imm_rm.op != nil {
 			begin(asm)
 			asm.Mov(Imm{0}, Indirect{Rdi, 0, 0})
 			asm.Mov(Imm{tc.rhs}, Indirect{Rdi, 0, 32})
@@ -150,7 +150,7 @@ func TestArith(t *testing.T) {
 			asm.Mov(Indirect{Rdi, 0, 64}, Rax)
 			funcs = append(funcs, finish(asm))
 		}
-		if tc.insn.r_rm.ok() {
+		if tc.insn.r_rm != nil {
 			begin(asm)
 			asm.Mov(Imm{tc.lhs}, R10)
 			asm.Mov(Imm{0}, Indirect{Rdi, 0, 0})
@@ -159,7 +159,7 @@ func TestArith(t *testing.T) {
 			asm.Mov(Indirect{Rdi, 0, 64}, Rax)
 			funcs = append(funcs, finish(asm))
 		}
-		if tc.insn.rm_r.ok() {
+		if tc.insn.rm_r != nil {
 			begin(asm)
 			asm.Mov(Imm{0}, Indirect{Rdi, 0, 0})
 			asm.Mov(Imm{tc.lhs}, Indirect{Rdi, 0, 32})
