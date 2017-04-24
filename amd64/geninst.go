@@ -76,7 +76,11 @@ func (asm *Assembler) Arithmetic(insn *Instruction, src, dst Operand) {
 			asm.bytes(insn.imm_rm.op)
 			dst.ModRM(asm, Register{insn.imm_rm.sub, 0})
 		}
-		if insn.bits == 8 {
+		immbits := insn.imm_rm.immbits
+		if immbits == 0 {
+			immbits = insn.bits
+		}
+		if immbits == 8 {
 			asm.byte(byte(s.Val))
 		} else {
 			asm.int32(uint32(s.Val))
@@ -114,35 +118,26 @@ func (a *Assembler) MovAbs(src uint64, dst Register) {
 }
 
 func (a *Assembler) Add(src, dst Operand)   { a.Arithmetic(InstAdd, src, dst) }
-func (a *Assembler) Addl(src, dst Operand)  { a.Arithmetic(InstAddl, src, dst) }
 func (a *Assembler) Addb(src, dst Operand)  { a.Arithmetic(InstAddb, src, dst) }
 func (a *Assembler) Adc(src, dst Operand)   { a.Arithmetic(InstAdc, src, dst) }
-func (a *Assembler) Adcl(src, dst Operand)  { a.Arithmetic(InstAdcl, src, dst) }
 func (a *Assembler) Adcb(src, dst Operand)  { a.Arithmetic(InstAdcb, src, dst) }
 func (a *Assembler) And(src, dst Operand)   { a.Arithmetic(InstAnd, src, dst) }
-func (a *Assembler) Andl(src, dst Operand)  { a.Arithmetic(InstAndl, src, dst) }
 func (a *Assembler) Andb(src, dst Operand)  { a.Arithmetic(InstAndb, src, dst) }
 func (a *Assembler) Cmp(src, dst Operand)   { a.Arithmetic(InstCmp, src, dst) }
-func (a *Assembler) Cmpl(src, dst Operand)  { a.Arithmetic(InstCmpl, src, dst) }
 func (a *Assembler) Cmpb(src, dst Operand)  { a.Arithmetic(InstCmpb, src, dst) }
 func (a *Assembler) Mov(src, dst Operand)   { a.Arithmetic(InstMov, src, dst) }
 func (a *Assembler) Movl(src, dst Operand)  { a.Arithmetic(InstMovl, src, dst) }
 func (a *Assembler) Movb(src, dst Operand)  { a.Arithmetic(InstMovb, src, dst) }
 func (a *Assembler) Or(src, dst Operand)    { a.Arithmetic(InstOr, src, dst) }
-func (a *Assembler) Orl(src, dst Operand)   { a.Arithmetic(InstOrl, src, dst) }
 func (a *Assembler) Orb(src, dst Operand)   { a.Arithmetic(InstOrb, src, dst) }
 func (a *Assembler) Lea(src, dst Operand)   { a.Arithmetic(InstLea, src, dst) }
 func (a *Assembler) Sbb(src, dst Operand)   { a.Arithmetic(InstSbb, src, dst) }
-func (a *Assembler) Sbbl(src, dst Operand)  { a.Arithmetic(InstSbbl, src, dst) }
 func (a *Assembler) Sbbb(src, dst Operand)  { a.Arithmetic(InstSbbb, src, dst) }
 func (a *Assembler) Sub(src, dst Operand)   { a.Arithmetic(InstSub, src, dst) }
-func (a *Assembler) Subl(src, dst Operand)  { a.Arithmetic(InstSubl, src, dst) }
 func (a *Assembler) Subb(src, dst Operand)  { a.Arithmetic(InstSubb, src, dst) }
 func (a *Assembler) Test(src, dst Operand)  { a.Arithmetic(InstTest, src, dst) }
-func (a *Assembler) Testl(src, dst Operand) { a.Arithmetic(InstTestl, src, dst) }
 func (a *Assembler) Testb(src, dst Operand) { a.Arithmetic(InstTestb, src, dst) }
 func (a *Assembler) Xor(src, dst Operand)   { a.Arithmetic(InstXor, src, dst) }
-func (a *Assembler) Xorl(src, dst Operand)  { a.Arithmetic(InstXorl, src, dst) }
 func (a *Assembler) Xorb(src, dst Operand)  { a.Arithmetic(InstXorb, src, dst) }
 
 func (a *Assembler) Shl(src, dst Operand)  { a.Arithmetic(InstShl, src, dst) }
