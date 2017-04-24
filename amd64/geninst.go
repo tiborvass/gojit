@@ -223,6 +223,22 @@ func (a *Assembler) JccShortForward(cc byte) func() {
 	}
 }
 
+func (a *Assembler) JccForward(cc byte) func() {
+	a.byte(0x0f)
+	a.byte(0x80 | cc)
+	off := a.Off
+	a.int32(0)
+	base := a.Off
+	return func() {
+		end := a.Off
+		i := end - base
+		a.Buf[off] = byte(i & 0xFF)
+		a.Buf[off+1] = byte(i >> 8)
+		a.Buf[off+2] = byte(i >> 16)
+		a.Buf[off+3] = byte(i >> 24)
+	}
+}
+
 func (a *Assembler) Setcc(cc byte, dst Register) {
 	a.rex(false, false, false, dst.Val > 7)
 	a.byte(0x0f)
