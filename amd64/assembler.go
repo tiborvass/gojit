@@ -56,6 +56,12 @@ func (a *Assembler) byte(b byte) {
 	a.Off++
 }
 
+func (a *Assembler) bytes(bs []byte) {
+	for _, b := range bs {
+		a.byte(b)
+	}
+}
+
 func (a *Assembler) int16(i uint16) {
 	a.Buf[a.Off] = byte(i & 0xFF)
 	a.Buf[a.Off+1] = byte(i >> 8)
