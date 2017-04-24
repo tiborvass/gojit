@@ -1,11 +1,13 @@
 package amd64
 
 import (
+	"bytes"
 	"fmt"
 	"runtime"
 	"testing"
 
 	"github.com/nelhage/gojit"
+	"golang.org/x/arch/x86/x86asm"
 )
 
 var mem []byte = make([]byte, 64)
@@ -107,6 +109,54 @@ func testSimple(name string, t *testing.T, cases []simple) {
 				t.Errorf("f(%s)[%d](%x) = %x, expect %x",
 					name, i, in, got, out)
 			}
+		}
+	}
+}
+
+func TestEmitArith(t *testing.T) {
+	var asm *Assembler
+
+	tests := []struct {
+		Emit func()
+		Exp  string
+	}{
+		{func() { asm.Add(Imm{-5}, R14) }, "0000  ADDQ $-0x5, R14\n"},
+		{func() { asm.Add(Imm{-5}, Rdi) }, "0000  ADDQ $-0x5, DI\n"},
+		{func() { asm.Add(Imm{-5}, Edi) }, "0000  ADDL $-0x5, DI\n"},
+		{func() { asm.Shl(Imm{10}, R8) }, "0000  SHLQ $0xa, R8\n"},
+		{func() { asm.Shl(Imm{10}, Rbx) }, "0000  SHLQ $0xa, BX\n"},
+		{func() { asm.Shl(Imm{10}, Ebx) }, "0000  SHLL $0xa, BX\n"},
+	}
+
+	for _, tc := range tests {
+		asm = &Assembler{mem, 0, CgoABI}
+		tc.Emit()
+
+		var got bytes.Buffer
+		x86bin := mem[:asm.Off]
+		pc := uint64(0)
+		for len(x86bin) > 0 {
+			inst, err := x86asm.Decode(x86bin, 64)
+			var text string
+			size := inst.Len
+			if err != nil || size == 0 || inst.Op == 0 {
+				size = 1
+				text = "?"
+			} else {
+				text = x86asm.GoSyntax(inst, pc, nil)
+			}
+
+			fmt.Fprintf(&got, "%04x  %s\n", pc, text)
+			x86bin = x86bin[size:]
+			pc += uint64(size)
+		}
+
+		if got.String() != tc.Exp {
+			t.Errorf("code generation failed: %x", mem[:asm.Off])
+			t.Log("Got:")
+			t.Log(got.String())
+			t.Log("Expected")
+			t.Log(tc.Exp)
 		}
 	}
 }

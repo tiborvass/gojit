@@ -48,7 +48,7 @@ func (asm *Assembler) arithmeticImmReg(insn *Instruction, src Imm, dst Register)
 		}
 		asm.byte(insn.imm_r[0] | (dst.Val & 7))
 	} else {
-		asm.rex(dst.Bits == 64, false, dst.Val > 7, false)
+		asm.rex(dst.Bits == 64, false, false, dst.Val > 7)
 		asm.bytes(insn.imm_rm.op)
 		asm.modrm(MOD_REG, insn.imm_rm.sub, dst.Val&7)
 	}
@@ -201,6 +201,26 @@ func (a *Assembler) JmpRel(dst uintptr) {
 func (a *Assembler) JccShort(cc byte, off int8) {
 	a.byte(0x70 | cc)
 	a.byte(byte(off))
+}
+
+// Like JccShort, but the offset is calculated with a closure function
+// Use like this:
+//     closejcc := a.JccShortDelayed(CC_EQ)
+//     // [emit code]
+//     closejcc()  // jump here
+//
+func (a *Assembler) JccShortForward(cc byte) func() {
+	a.byte(0x70 | cc)
+	off := a.Off
+	a.byte(0)
+	base := a.Off
+	return func() {
+		end := a.Off
+		if int(int8(end-base)) != end-base {
+			panic("jcc: too far!")
+		}
+		a.Buf[off] = byte(int8(end - base))
+	}
 }
 
 func (a *Assembler) Setcc(cc byte, dst Register) {
