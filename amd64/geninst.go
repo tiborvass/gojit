@@ -28,6 +28,18 @@ func (a *Assembler) Decb(o Operand) {
 	o.ModRM(a, Register{1, 0})
 }
 
+func (a *Assembler) Neg(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xf7)
+	o.ModRM(a, Register{3, 0})
+}
+
+func (a *Assembler) Negb(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xf6)
+	o.ModRM(a, Register{3, 0})
+}
+
 func (a *Assembler) Not(o Operand) {
 	o.Rex(a, Register{})
 	a.byte(0xf7)
@@ -201,6 +213,9 @@ func (a *Assembler) Bt(src, dst Operand)  { a.Arithmetic(InstBt, src, dst) }
 func (a *Assembler) Btc(src, dst Operand) { a.Arithmetic(InstBtc, src, dst) }
 func (a *Assembler) Bts(src, dst Operand) { a.Arithmetic(InstBts, src, dst) }
 func (a *Assembler) Btr(src, dst Operand) { a.Arithmetic(InstBtr, src, dst) }
+
+func (a *Assembler) Bsr(src, dst Operand) { a.Arithmetic(InstBsr, src, dst) }
+func (a *Assembler) Bsf(src, dst Operand) { a.Arithmetic(InstBsf, src, dst) }
 
 func (a *Assembler) Int3()  { a.byte(0xcc) }
 func (a *Assembler) Ret()   { a.byte(0xc3) }
