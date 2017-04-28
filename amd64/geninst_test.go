@@ -151,6 +151,10 @@ func TestEmitArith(t *testing.T) {
 		{func() { asm.Test(Eax, R14d) }, "0000  TESTL AX, R14\n"},
 		{func() { asm.Test(Eax, Edi) }, "0000  TESTL AX, DI\n"},
 		{func() { asm.Testb(Eax, Edx) }, "0000  TESTL AL, DL\n"},
+		{func() { asm.Cmovcc(CC_GE, Eax, Edx) }, "0000  CMOVGE AX, DX\n"},
+		{func() { asm.Cmovcc(CC_GE, Rax, Rdx) }, "0000  CMOVGE AX, DX\n"}, // FIXME: can't test 64-bit/32-bit version
+		{func() { asm.Cmovcc(CC_A, R12, R14) }, "0000  CMOVA R12, R14\n"},
+		{func() { asm.Cmovcc(CC_A, R12d, R14d) }, "0000  CMOVA R12, R14\n"}, // FIXME: can't test 64-bit/32-bit version
 	}
 
 	for _, tc := range tests {

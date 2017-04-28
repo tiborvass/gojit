@@ -28,6 +28,18 @@ func (a *Assembler) Decb(o Operand) {
 	o.ModRM(a, Register{1, 0})
 }
 
+func (a *Assembler) Imul(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xf7)
+	o.ModRM(a, Register{5, 0})
+}
+
+func (a *Assembler) Mul(o Operand) {
+	o.Rex(a, Register{})
+	a.byte(0xf7)
+	o.ModRM(a, Register{4, 0})
+}
+
 func (a *Assembler) Neg(o Operand) {
 	o.Rex(a, Register{})
 	a.byte(0xf7)
@@ -221,6 +233,10 @@ func (a *Assembler) Int3()  { a.byte(0xcc) }
 func (a *Assembler) Ret()   { a.byte(0xc3) }
 func (a *Assembler) Pushf() { a.byte(0x9c) }
 func (a *Assembler) Popf()  { a.byte(0x9d) }
+func (a *Assembler) Cmc()   { a.byte(0xf5) }
+func (a *Assembler) Clc()   { a.byte(0xf8) }
+func (a *Assembler) Cli()   { a.byte(0xfa) }
+func (a *Assembler) Cld()   { a.byte(0xfc) }
 
 func (a *Assembler) Call(dst Operand) {
 	if _, ok := dst.(Imm); ok {
@@ -311,6 +327,13 @@ func (a *Assembler) Setcc(cc byte, dst Register) {
 	a.byte(0x0f)
 	a.byte(0x90 | cc)
 	dst.ModRM(a, dst)
+}
+
+func (a *Assembler) Cmovcc(cc byte, src Operand, dst Register) {
+	src.Rex(a, dst)
+	a.byte(0x0F)
+	a.byte(0x40 | cc)
+	src.ModRM(a, dst)
 }
 
 func (a *Assembler) JccRel(cc byte, dst uintptr) {
