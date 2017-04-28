@@ -106,7 +106,7 @@ func (a *Assembler) RcrCl(o Operand) {
 	o.ModRM(a, Register{3, 0})
 }
 
-func (asm *Assembler) arithmeticImmReg(insn *Instruction, src Imm, dst Register) {
+func (asm *Assembler) arithmeticImmReg(insn *Instruction, src Imm, dst Register, imm_rm ImmRm) {
 	if insn.imm_r != nil {
 		asm.rex(false, false, false, dst.Val > 7)
 		if len(insn.imm_r) > 1 {
@@ -115,8 +115,8 @@ func (asm *Assembler) arithmeticImmReg(insn *Instruction, src Imm, dst Register)
 		asm.byte(insn.imm_r[0] | (dst.Val & 7))
 	} else {
 		asm.rex(dst.Bits == 64, false, false, dst.Val > 7)
-		asm.bytes(insn.imm_rm.op)
-		asm.modrm(MOD_REG, insn.imm_rm.sub, dst.Val&7)
+		asm.bytes(imm_rm.op)
+		asm.modrm(MOD_REG, imm_rm.sub, dst.Val&7)
 	}
 }
 
@@ -135,16 +135,21 @@ func (asm *Assembler) arithmeticRegReg(insn *Instruction, src Register, dst Regi
 func (asm *Assembler) Arithmetic(insn *Instruction, src, dst Operand) {
 	switch s := src.(type) {
 	case Imm:
-		if dr, ok := dst.(Register); ok {
-			asm.arithmeticImmReg(insn, s, dr)
-		} else {
-			dst.Rex(asm, Register{insn.imm_rm.sub, 0})
-			asm.bytes(insn.imm_rm.op)
-			dst.ModRM(asm, Register{insn.imm_rm.sub, 0})
+		imm_rm := insn.imm_rm
+		immbits := insn.bits
+		if insn.imm8_rm.op != nil && int32(int8(s.Val)) == s.Val {
+			imm_rm = insn.imm8_rm
+			immbits = 8
 		}
-		immbits := insn.imm_rm.immbits
-		if immbits == 0 {
-			immbits = insn.bits
+		if imm_rm.op == nil {
+			panic("immediate value is of unsupported size")
+		}
+		if dr, ok := dst.(Register); ok {
+			asm.arithmeticImmReg(insn, s, dr, imm_rm)
+		} else {
+			dst.Rex(asm, Register{imm_rm.sub, 0})
+			asm.bytes(imm_rm.op)
+			dst.ModRM(asm, Register{imm_rm.sub, 0})
 		}
 		if immbits == 8 {
 			asm.byte(byte(s.Val))
