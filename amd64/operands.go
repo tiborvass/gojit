@@ -147,9 +147,15 @@ func (s SIB) Rex(asm *Assembler, reg Register) {
 
 func (s SIB) ModRM(asm *Assembler, reg Register) {
 	if s.Offset != 0 {
-		asm.modrm(MOD_INDIR_DISP32, reg.Val&7, REG_SIB)
-		asm.sib(s.Scale.scale, s.Index.Val&7, s.Base.Val&7)
-		asm.int32(uint32(s.Offset))
+		if int32(int8(s.Offset)) == s.Offset {
+			asm.modrm(MOD_INDIR_DISP8, reg.Val&7, REG_SIB)
+			asm.sib(s.Scale.scale, s.Index.Val&7, s.Base.Val&7)
+			asm.byte(uint8(s.Offset))
+		} else {
+			asm.modrm(MOD_INDIR_DISP32, reg.Val&7, REG_SIB)
+			asm.sib(s.Scale.scale, s.Index.Val&7, s.Base.Val&7)
+			asm.int32(uint32(s.Offset))
+		}
 	} else {
 		asm.modrm(MOD_INDIR, reg.Val&7, REG_SIB)
 		asm.sib(s.Scale.scale, s.Index.Val&7, s.Base.Val&7)
