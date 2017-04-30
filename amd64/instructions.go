@@ -34,7 +34,7 @@ var (
 	InstAnd  = &Instruction{"and", nil, ImmRm{j{0x81}, 4}, ImmRm{j{0x83}, 4}, j{0x21}, j{0x23}, 64}
 	InstAndb = &Instruction{"andb", nil, ImmRm{j{0x80}, 4}, ImmRm{}, j{0x20}, j{0x22}, 8}
 
-	InstCmp  = &Instruction{"cmp", nil, ImmRm{j{0x81}, 7}, ImmRm{}, j{0x39}, j{0x3B}, 64}
+	InstCmp  = &Instruction{"cmp", nil, ImmRm{j{0x81}, 7}, ImmRm{j{0x83}, 7}, j{0x39}, j{0x3B}, 64}
 	InstCmpb = &Instruction{"cmpb", nil, ImmRm{j{0x80}, 7}, ImmRm{}, j{0x38}, j{0x3A}, 8}
 
 	InstOr  = &Instruction{"or", nil, ImmRm{j{0x81}, 1}, ImmRm{j{0x83}, 1}, j{0x09}, j{0x0B}, 64}
