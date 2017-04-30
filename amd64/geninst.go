@@ -318,6 +318,9 @@ func (a *Assembler) JccForward(cc byte) func() {
 	a.int32(0)
 	base := a.Off
 	return func() {
+		if a.err != nil {
+			return
+		}
 		end := a.Off
 		i := end - base
 		a.Buf[off] = byte(i & 0xFF)

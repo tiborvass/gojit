@@ -1,7 +1,11 @@
 // Package amd64 implements a simple amd64 assembler.
 package amd64
 
-import "github.com/nelhage/gojit"
+import (
+	"errors"
+
+	"github.com/nelhage/gojit"
+)
 
 type ABI int
 
@@ -9,6 +13,8 @@ const (
 	CgoABI ABI = iota
 	GoABI
 )
+
+var ErrBufferTooSmall = errors.New("buffer is too small")
 
 // Assembler implements a simple amd64 assembler. All methods on
 // Assembler will emit code to Buf[Off:] and advances Off. Buf will
@@ -18,6 +24,8 @@ type Assembler struct {
 	Buf []byte
 	Off int
 	ABI ABI
+
+	err error
 }
 
 func New(size int) (*Assembler, error) {
@@ -51,7 +59,17 @@ func (a *Assembler) BuildTo(out interface{}) {
 	}
 }
 
+func (a *Assembler) Error() error {
+	err := a.err
+	a.err = nil
+	return err
+}
+
 func (a *Assembler) byte(b byte) {
+	if a.Off+1 > len(a.Buf) {
+		a.err = ErrBufferTooSmall
+		return
+	}
 	a.Buf[a.Off] = b
 	a.Off++
 }
@@ -63,12 +81,20 @@ func (a *Assembler) bytes(bs []byte) {
 }
 
 func (a *Assembler) int16(i uint16) {
+	if a.Off+2 > len(a.Buf) {
+		a.err = ErrBufferTooSmall
+		return
+	}
 	a.Buf[a.Off] = byte(i & 0xFF)
 	a.Buf[a.Off+1] = byte(i >> 8)
 	a.Off += 2
 }
 
 func (a *Assembler) int32(i uint32) {
+	if a.Off+4 > len(a.Buf) {
+		a.err = ErrBufferTooSmall
+		return
+	}
 	a.Buf[a.Off] = byte(i & 0xFF)
 	a.Buf[a.Off+1] = byte(i >> 8)
 	a.Buf[a.Off+2] = byte(i >> 16)
@@ -77,6 +103,10 @@ func (a *Assembler) int32(i uint32) {
 }
 
 func (a *Assembler) int64(i uint64) {
+	if a.Off+8 > len(a.Buf) {
+		a.err = ErrBufferTooSmall
+		return
+	}
 	a.Buf[a.Off] = byte(i & 0xFF)
 	a.Buf[a.Off+1] = byte(i >> 8)
 	a.Buf[a.Off+2] = byte(i >> 16)

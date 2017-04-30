@@ -158,7 +158,7 @@ func TestEmitArith(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		asm = &Assembler{mem, 0, CgoABI}
+		asm = &Assembler{Buf: mem, Off: 0, ABI: CgoABI}
 		tc.Emit()
 
 		var got bytes.Buffer
@@ -213,7 +213,7 @@ func TestArith(t *testing.T) {
 	defer gojit.Release(buf)
 
 	for _, tc := range cases {
-		asm := &Assembler{buf, 0, CgoABI}
+		asm := &Assembler{Buf: buf, Off: 0, ABI: CgoABI}
 		var funcs []func(uintptr) uintptr
 		if tc.insn.imm_r != nil {
 			begin(asm)

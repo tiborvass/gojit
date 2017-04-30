@@ -34,5 +34,5 @@ func newAsm(t testing.TB) *Assembler {
 	if e != nil {
 		t.Fatalf("alloc: ", e.Error())
 	}
-	return &Assembler{buf, 0, CgoABI}
+	return &Assembler{Buf: buf, Off: 0, ABI: CgoABI}
 }
