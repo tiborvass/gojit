@@ -330,11 +330,21 @@ func (a *Assembler) JccForward(cc byte) func() {
 	}
 }
 
-func (a *Assembler) Setcc(cc byte, dst Register) {
-	a.rex(false, false, false, dst.Val > 7)
-	a.byte(0x0f)
-	a.byte(0x90 | cc)
-	dst.ModRM(a, dst)
+func (a *Assembler) Setcc(cc byte, dst Operand) {
+	switch d := dst.(type) {
+	case Register:
+		a.rex(false, false, false, d.Val > 7)
+		a.byte(0x0f)
+		a.byte(0x90 | cc)
+		d.ModRM(a, d)
+	case Indirect:
+		dst.Rex(a, Register{})
+		a.byte(0x0f)
+		a.byte(0x90 | cc)
+		d.ModRM(a, Register{})
+	default:
+		panic("unsupported setcc operand")
+	}
 }
 
 func (a *Assembler) Cmovcc(cc byte, src Operand, dst Register) {

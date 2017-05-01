@@ -77,7 +77,7 @@ var (
 
 	InstMov  = &Instruction{"mov", j{0xB8}, ImmRm{j{0xc7}, 0}, ImmRm{}, j{0x89}, j{0x8b}, 64}
 	InstMovl = as32Bits(InstMov)
-	InstMovb = &Instruction{"movb", j{0xB0}, ImmRm{j{0xc6}, 0}, ImmRm{}, j{0x88}, j{0x8a}, 64}
+	InstMovb = &Instruction{"movb", j{0xB0}, ImmRm{j{0xc6}, 0}, ImmRm{}, j{0x88}, j{0x8a}, 8}
 
 	InstBsr = &Instruction{"bsr", nil, ImmRm{}, ImmRm{}, nil, j{0x0F, 0xBD}, 64}
 	InstBsf = &Instruction{"bsf", nil, ImmRm{}, ImmRm{}, nil, j{0x0F, 0xBC}, 64}
