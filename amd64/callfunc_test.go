@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/nelhage/gojit"
+	"github.com/rasky/gojit"
 )
 
 func TestCallFunc(t *testing.T) {

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/nelhage/gojit"
-	"github.com/nelhage/gojit/amd64"
+	"github.com/rasky/gojit"
+	"github.com/rasky/gojit/amd64"
 )
 
 type compiled struct {

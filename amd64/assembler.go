@@ -4,7 +4,7 @@ package amd64
 import (
 	"errors"
 
-	"github.com/nelhage/gojit"
+	"github.com/rasky/gojit"
 )
 
 type ABI int

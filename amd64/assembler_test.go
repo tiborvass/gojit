@@ -3,7 +3,7 @@ package amd64
 import (
 	"testing"
 
-	"github.com/nelhage/gojit"
+	"github.com/rasky/gojit"
 )
 
 //   48 89 fe             	mov    %rdi,%rsi

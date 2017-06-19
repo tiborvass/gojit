@@ -2,11 +2,12 @@ package bf
 
 import (
 	"bytes"
-	"github.com/nelhage/gojit/amd64"
 	"io"
 	"reflect"
 	"runtime"
 	"testing"
+
+	"github.com/rasky/gojit/amd64"
 )
 
 var helloWorld = "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."

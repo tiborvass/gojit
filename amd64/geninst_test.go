@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/nelhage/gojit"
+	"github.com/rasky/gojit"
 	"golang.org/x/arch/x86/x86asm"
 )
 
