@@ -110,6 +110,3 @@ func buildToInternal(b []byte, out interface{}, build func([]byte) func()) {
 
 	*(*func())(unsafe.Pointer(ival.val)) = f
 }
-
-func jitcall()
-func cgocall()
