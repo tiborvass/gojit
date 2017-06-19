@@ -311,9 +311,18 @@ func (a *Assembler) JccShortForward(cc byte) func() {
 	}
 }
 
+func (a *Assembler) JmpForward() func() {
+	a.byte(0xe9)
+	return a.fwdOffset()
+}
+
 func (a *Assembler) JccForward(cc byte) func() {
 	a.byte(0x0f)
 	a.byte(0x80 | cc)
+	return a.fwdOffset()
+}
+
+func (a *Assembler) fwdOffset() func() {
 	off := a.Off
 	a.int32(0)
 	base := a.Off
