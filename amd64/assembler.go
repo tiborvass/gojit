@@ -50,8 +50,8 @@ func (a *Assembler) Release() {
 
 func (a *Assembler) BuildTo(out interface{}) {
 	switch a.ABI {
-	case CgoABI:
-		gojit.BuildToCgo(a.Buf, out)
+	//case CgoABI:
+	//	gojit.BuildToCgo(a.Buf, out)
 	case GoABI:
 		gojit.BuildTo(a.Buf, out)
 	default:

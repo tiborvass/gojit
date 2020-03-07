@@ -54,15 +54,15 @@ func Build(b []byte) func() {
 // much easier and safer to program against (your JIT'd code need only
 // conform to your platform's C ABI), at the cost of significant
 // overhead for each call into your code.
-func BuildCgo(b []byte) func() {
-	dummy := cgocall
-	fn := &struct {
-		trampoline uintptr
-		jitcode    uintptr
-	}{**(**uintptr)(unsafe.Pointer(&dummy)), Addr(b)}
-
-	return *(*func())(unsafe.Pointer(&fn))
-}
+//func BuildCgo(b []byte) func() {
+//	dummy := cgocall
+//	fn := &struct {
+//		trampoline uintptr
+//		jitcode    uintptr
+//	}{**(**uintptr)(unsafe.Pointer(&dummy)), Addr(b)}
+//
+//	return *(*func())(unsafe.Pointer(&fn))
+//}
 
 // BuildTo converts a byte-slice into an arbitrary-signatured
 // function. The out argument should be a pointer to a variable of
@@ -84,9 +84,9 @@ func BuildTo(b []byte, out interface{}) {
 }
 
 // BuildToCgo is as Build, but uses cgo like BuildCGo
-func BuildToCgo(b []byte, out interface{}) {
-	buildToInternal(b, out, BuildCgo)
-}
+//func BuildToCgo(b []byte, out interface{}) {
+//	buildToInternal(b, out, BuildCgo)
+//}
 
 func buildToInternal(b []byte, out interface{}, build func([]byte) func()) {
 	v := reflect.ValueOf(out)
@@ -110,3 +110,6 @@ func buildToInternal(b []byte, out interface{}, build func([]byte) func()) {
 
 	*(*func())(unsafe.Pointer(ival.val)) = f
 }
+
+//go:linkname runtimecgocall runtime.cgocall
+func runtimecgocall(fn, arg unsafe.Pointer) int32

@@ -123,7 +123,7 @@ func emitRbrac(asm *amd64.Assembler, cc *compiled) {
 	asm.Off = end
 }
 
-var abi amd64.ABI
+var abi = amd64.GoABI
 
 // Compile compiles a brainfuck program (represented as a byte slice)
 // into a Go function. The function accepts as an argument the tape to

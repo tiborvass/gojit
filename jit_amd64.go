@@ -5,4 +5,5 @@ package gojit
 const PageSize = 4096
 
 func jitcall()
-func cgocall()
+
+//func cgocall()
