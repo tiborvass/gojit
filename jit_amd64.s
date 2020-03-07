@@ -13,6 +13,6 @@
 //        RET
 
 TEXT ·jitcall(SB),NOSPLIT,$0
-        LEAQ argframe+0(FP), DI
-        MOVQ 8(DX), AX
+        MOVQ jitcode+0(FP), AX
+        LEAQ argframe+8(FP), DI
         JMP AX

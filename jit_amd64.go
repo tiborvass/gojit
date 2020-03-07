@@ -4,6 +4,6 @@ package gojit
 // should be an integer multiple of the page size.
 const PageSize = 4096
 
-func jitcall()
+func jitcall(uintptr, ...uintptr)
 
 //func cgocall()

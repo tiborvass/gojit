@@ -35,20 +35,6 @@ func Addr(b []byte) uintptr {
 	return hdr.Data
 }
 
-// Build returns a nullary golang function that will result in jumping
-// into the specified byte slice. The slice should in most cases be a
-// slice returned by Alloc, although you could also use syscall.Mmap
-// or syscall.Mprotect directly.
-func Build(b []byte) func() {
-	dummy := jitcall
-	fn := &struct {
-		trampoline uintptr
-		jitcode    uintptr
-	}{**(**uintptr)(unsafe.Pointer(&dummy)), Addr(b)}
-
-	return *(*func())(unsafe.Pointer(&fn))
-}
-
 // BuildCgo is like Build, but the resulting provided code will be
 // called by way of the cgo runtime. This has the advantage of being
 // much easier and safer to program against (your JIT'd code need only
@@ -80,7 +66,7 @@ func Build(b []byte) func() {
 //     8(%rdi)  [  len(slice)  ]
 //     0(%rdi)  [ uint8* data  ]
 func BuildTo(b []byte, out interface{}) {
-	buildToInternal(b, out, Build)
+	buildToInternal(b, out, jitcall)
 }
 
 // BuildToCgo is as Build, but uses cgo like BuildCGo
@@ -88,7 +74,7 @@ func BuildTo(b []byte, out interface{}) {
 //	buildToInternal(b, out, BuildCgo)
 //}
 
-func buildToInternal(b []byte, out interface{}, build func([]byte) func()) {
+func buildToInternal(b []byte, out interface{}, call func(uintptr, ...uintptr)) {
 	v := reflect.ValueOf(out)
 	if v.Type().Kind() != reflect.Ptr {
 		panic("BuildTo: must pass a pointer")
@@ -96,8 +82,6 @@ func buildToInternal(b []byte, out interface{}, build func([]byte) func()) {
 	if v.Elem().Type().Kind() != reflect.Func {
 		panic("BuildTo: must pass a pointer to func")
 	}
-
-	f := build(b)
 
 	ival := *(*struct {
 		typ uintptr
@@ -108,7 +92,12 @@ func buildToInternal(b []byte, out interface{}, build func([]byte) func()) {
 	// we know it fits into a word, and thus `val' is just the
 	// pointer itself (http://research.swtch.com/interfaces)
 
-	*(*func())(unsafe.Pointer(ival.val)) = f
+	addr := Addr(b)
+	fn := func(args ...uintptr) {
+		call(addr, args...)
+	}
+
+	*(*func(...uintptr))(unsafe.Pointer(ival.val)) = fn
 }
 
 //go:linkname runtimecgocall runtime.cgocall
